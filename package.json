@@ -1,12 +1,8 @@
 {
-  "name": "chrome-extension-boilerplate-react-vite",
+  "name": "tabytarz",
   "version": "0.0.1",
-  "description": "chrome extension boilerplate",
+  "description": "Next Level Tabs Manager | Chrome Extension",
   "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/Jonghakseo/chrome-extension-boilerplate-react-vite.git"
-  },
   "scripts": {
     "tw-build": "npx tailwindcss -i src/style/app.css -o src/style/tailwind.css -w",
     "build": "tsc --noEmit && && vite build",
