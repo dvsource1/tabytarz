@@ -92,7 +92,6 @@ const _ungroupMismatchingTabs = async (groupConfigs: GroupConfig[]) => {
 };
 
 const _groupMatchingTabs = async (groupConfigs: GroupConfig[]) => {
-  const allTabs = await chrome.tabs.query({});
   const tabsWithoutGroup = await chrome.tabs.query({
     groupId: chrome.tabGroups.TAB_GROUP_ID_NONE,
   });
