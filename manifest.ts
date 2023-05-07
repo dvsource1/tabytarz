@@ -14,14 +14,19 @@ const manifest: chrome.runtime.ManifestV3 = {
     type: "module",
   },
   action: {
-    default_popup: "src/pages/popup/index.html",
-    default_icon: "icon-32.png",
+    // default_popup: "src/pages/popup/index.html",
+    // default_icon: {
+    //   "16": "icon-16.png",
+    //   "24": "icon-24.png",
+    //   "32": "icon-32.png",
+    // },
   },
   // chrome_url_overrides: {
   //   newtab: "src/pages/newtab/index.html",
   // },
   icons: {
     "16": "icon-16.png",
+    "24": "icon-24.png",
     "32": "icon-32.png",
     "48": "icon-48.png",
     "128": "icon-128.png",
@@ -48,6 +53,7 @@ const manifest: chrome.runtime.ManifestV3 = {
       matches: ["*://*/*"],
     },
   ],
+  permissions: ["storage", "tabs", "tabGroups"],
 };
 
 export default manifest;
