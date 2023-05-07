@@ -9,13 +9,17 @@ import { _groupTab } from "./commonActions";
 type IDepandencies = { groups: GroupConfig[] };
 
 export const handleTabChange =
-  (deps: IDepandencies) => (_: TabAction, e: TabActionEvent) => {
-    console.log(_, e);
+  (deps: IDepandencies) => async (action: TabAction, e: TabActionEvent) => {
+    console.log(action, e);
     const { groups } = deps;
     const { tab } = e;
     const config = getMatchingGroupConfig(tab, groups);
     if (config) {
-      hangleTabGrouping(tab, config);
+      await hangleTabGrouping(tab, config);
+    }
+
+    if (action !== "move") {
+      // await _sortAndCollapeTabGroups(groups);
     }
   };
 
