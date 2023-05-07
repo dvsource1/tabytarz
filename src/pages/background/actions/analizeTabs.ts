@@ -4,7 +4,7 @@ import {
   getTabGroupConfig,
   matchTabWithGroupConfig,
 } from "@src/pages/background/helpers/tabsHelper";
-import { filter, forEach, isEmpty, map, reverse } from "lodash";
+import { filter, forEach, isEmpty, map, reverse, some } from "lodash";
 import { GroupConfig } from "../store/store";
 
 type IDepandencies = { groups: GroupConfig[] };
@@ -12,7 +12,6 @@ type IDepandencies = { groups: GroupConfig[] };
 export const analizeTabs = (deps: IDepandencies) => async () => {
   const { groups } = deps;
 
-  console.log(groups);
   _attachGroupKeys(groups);
 
   // merge duplicate groups
@@ -25,7 +24,7 @@ export const analizeTabs = (deps: IDepandencies) => async () => {
   await _groupMatchingTabs(groups);
 
   // sort tabs
-  _sortTabGroupsAndRest(groups);
+  _sortAndCollapeTabGroups(groups);
 };
 
 const _attachGroupKeys = (groupConfigs: GroupConfig[]) => {
@@ -78,10 +77,8 @@ const _ungroupMismatchingTabs = async (groupConfigs: GroupConfig[]) => {
     (configs: GroupConfig[]) => (tab: chrome.tabs.Tab) =>
       !!getMatchingGroupConfig(tab, configs);
 
-  console.log(tabGroups);
   forEach(tabGroups, async (tabGroup) => {
     const groupConfig = getTabGroupConfig(groupConfigs, tabGroup);
-    console.log(groupConfig);
     const tabs = await chrome.tabs.query({ groupId: tabGroup.id });
     const matcher = groupConfig
       ? _matchTabWithGroupConfig(groupConfig)
@@ -98,8 +95,6 @@ const _groupMatchingTabs = async (groupConfigs: GroupConfig[]) => {
   const tabsWithoutGroup = await chrome.tabs.query({
     groupId: chrome.tabGroups.TAB_GROUP_ID_NONE,
   });
-  console.log("allTabs", allTabs);
-  console.log("tabsWithoutGroup", tabsWithoutGroup);
   const tabGroups = await chrome.tabGroups.query({});
 
   forEach(tabsWithoutGroup, async (tab) => {
@@ -123,25 +118,37 @@ const _groupMatchingTabs = async (groupConfigs: GroupConfig[]) => {
   });
 };
 
-const _sortTabGroupsAndRest = async (groupConfigs: GroupConfig[]) => {
+const _sortAndCollapeTabGroups = async (groupConfigs: GroupConfig[]) => {
   const tabGroups = await chrome.tabGroups.query({});
 
   const _list: chrome.tabGroups.TabGroup[] = [];
   const _rest: chrome.tabGroups.TabGroup[] = [];
 
-  forEach(groupConfigs, (config) => {
+  forEach(groupConfigs, async (config) => {
     const tabGroup = getMachineTabGroup(config, tabGroups);
     if (tabGroup) {
       _list.push(tabGroup);
-    } else {
+      if (config.options?.collapse) {
+        await chrome.tabGroups.update(tabGroup.id, { collapsed: true });
+      }
+    }
+  });
+
+  forEach(tabGroups, (tabGroup) => {
+    if (!some(_list, { id: tabGroup.id })) {
       _rest.push(tabGroup);
     }
   });
 
+  // collapse rest groups
+  forEach(_rest, async (tabGroup) => {
+    await chrome.tabGroups.update(tabGroup.id, { collapsed: true });
+  });
+
   const _final = [..._rest, ...reverse(_list)];
 
-  forEach(_final, (tabGroup) => {
-    chrome.tabGroups.move(tabGroup.id, { index: 0 });
+  forEach(_final, async (tabGroup) => {
+    await chrome.tabGroups.move(tabGroup.id, { index: 0 });
   });
 
   const tabsWithoutGroup = await chrome.tabs.query({
@@ -154,7 +161,7 @@ const _sortTabGroupsAndRest = async (groupConfigs: GroupConfig[]) => {
     return aHostname.localeCompare(bHostname);
   });
 
-  forEach(tabsWithoutGroup, (tab) => {
-    chrome.tabs.move(tab.id, { index: -1 });
+  forEach(tabsWithoutGroup, async (tab) => {
+    await chrome.tabs.move(tab.id, { index: -1 });
   });
 };

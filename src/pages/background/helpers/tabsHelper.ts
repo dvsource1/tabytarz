@@ -1,13 +1,11 @@
 import { GroupConfig } from "@src/pages/background/store/store";
-import { find, isString } from "lodash";
+import { find, has } from "lodash";
 
 export const getTabGroupConfig = (
   groups: GroupConfig[],
-  tabGroupOrHost: chrome.tabGroups.TabGroup | string
+  tabGroup: chrome.tabGroups.TabGroup
 ): GroupConfig | undefined =>
-  !isString(tabGroupOrHost)
-    ? find(groups, matchTabGroupAndGroupConfig(tabGroupOrHost))
-    : find(groups, matchHostUrlAndGroupConfig(tabGroupOrHost));
+  find(groups, matchTabGroupAndGroupConfig(tabGroup));
 
 export const matchTabGroupAndGroupConfig =
   (tabGroup: chrome.tabGroups.TabGroup) =>
@@ -26,7 +24,6 @@ export const matchHostUrlAndGroupConfig =
 
 export const getHostFromUrl = (url: string): string => {
   const orlO = new URL(url);
-  console.log(orlO.host);
   return orlO.host;
 };
 
@@ -50,6 +47,10 @@ export const matchTabWithGroupConfig = (
   tab: chrome.tabs.Tab,
   config: GroupConfig
 ): boolean => {
+  if (has(config, "matcher")) {
+    return config.matcher(tab.url);
+  }
+
   const host = getHostFromUrl(tab.url);
   return matchHostUrlAndGroupConfig(host)(config);
 };

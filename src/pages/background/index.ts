@@ -1,7 +1,7 @@
 import reloadOnUpdate from "virtual:reload-on-update-in-background-script";
 import { analizeTabs } from "./actions/analizeTabs";
 import { initStore } from "./store/initStore";
-import { GroupConfig } from "./store/store";
+import { GroupConfig, ROOT_STORE } from "./store/store";
 
 reloadOnUpdate("pages/background");
 reloadOnUpdate("pages/content/style.css");
@@ -14,31 +14,7 @@ console.log("background loaded");
 // Store
 initStore();
 
-const groups: GroupConfig[] = [
-  {
-    host: "web.whatsapp.com",
-    matcher: (url: string) => {
-      const urlo = new URL(url);
-      return urlo.host === "web.whatsapp.com";
-    },
-    tabGroup: { title: "fb", color: "blue" },
-  },
-  {
-    host: "www.facebook.com",
-    tabGroup: { title: "fb", color: "cyan" },
-  },
-  {
-    host: "www.binance.com",
-    tabGroup: { title: "$", color: "orange" },
-  },
-  {
-    host: "www.youtube.com",
-    tabGroup: {
-      title: "yt",
-      color: "red",
-    },
-  },
-];
+const groups: GroupConfig[] = ROOT_STORE.groups;
 
 // Listners
 // tabListener(handleTabChange({ groups }));
