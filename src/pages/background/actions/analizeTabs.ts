@@ -6,6 +6,7 @@ import {
 } from "@src/pages/background/helpers/tabsHelper";
 import { filter, forEach, isEmpty, map, reverse, some } from "lodash";
 import { GroupConfig } from "../store/store";
+import { _groupTab } from "./commonActions";
 
 type IDepandencies = { groups: GroupConfig[] };
 
@@ -101,19 +102,7 @@ const _groupMatchingTabs = async (groupConfigs: GroupConfig[]) => {
     const groupConfig = getMatchingGroupConfig(tab, groupConfigs);
     if (groupConfig) {
       const tabGroup = getMachineTabGroup(groupConfig, tabGroups);
-      const tabGroupId = await chrome.tabs.group({
-        groupId: tabGroup?.id,
-        tabIds: [tab.id],
-      });
-      if (tabGroupId !== tabGroup?.id) {
-        // new tab group created
-        await chrome.tabGroups.update(tabGroupId, {
-          color: groupConfig
-            ? (groupConfig.tabGroup.color as chrome.tabGroups.ColorEnum)
-            : "grey",
-          title: groupConfig ? groupConfig.tabGroup.title : "",
-        });
-      }
+      await _groupTab(tab, tabGroup, groupConfig);
     }
   });
 };

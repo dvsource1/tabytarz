@@ -23,8 +23,13 @@ export const matchHostUrlAndGroupConfig =
   };
 
 export const getHostFromUrl = (url: string): string => {
-  const orlO = new URL(url);
-  return orlO.host;
+  try {
+    const orlO = new URL(url);
+    return orlO.host;
+  } catch (e) {
+    console.error("MYERR: getHostFromUrl", e);
+    return null;
+  }
 };
 
 export const getMatchingGroupConfig = (

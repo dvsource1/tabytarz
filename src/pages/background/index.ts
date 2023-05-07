@@ -1,5 +1,7 @@
 import reloadOnUpdate from "virtual:reload-on-update-in-background-script";
 import { analizeTabs } from "./actions/analizeTabs";
+import { handleTabChange } from "./actions/handleTabChange";
+import { tabListener } from "./listners/tabListner";
 import { initStore } from "./store/initStore";
 import { GroupConfig, ROOT_STORE } from "./store/store";
 
@@ -17,7 +19,7 @@ initStore();
 const groups: GroupConfig[] = ROOT_STORE.groups;
 
 // Listners
-// tabListener(handleTabChange({ groups }));
+tabListener(handleTabChange({ groups }));
 
 // chrome.storage.local.get("groups").then((groups) => console.log(groups));
 chrome.action.onClicked.addListener(analizeTabs({ groups }));
