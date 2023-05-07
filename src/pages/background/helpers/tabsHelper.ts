@@ -24,7 +24,7 @@ export const matchHostUrlAndGroupConfig =
     return group.host === host;
   };
 
-export const getHostFromUrl = (url: string) => {
+export const getHostFromUrl = (url: string): string => {
   const orlO = new URL(url);
   console.log(orlO.host);
   return orlO.host;
@@ -49,7 +49,7 @@ export const getMachineTabGroup = (
 export const matchTabWithGroupConfig = (
   tab: chrome.tabs.Tab,
   config: GroupConfig
-) => {
+): boolean => {
   const host = getHostFromUrl(tab.url);
   return matchHostUrlAndGroupConfig(host)(config);
 };

@@ -3,8 +3,8 @@ import {
   getMatchingGroupConfig,
   getTabGroupConfig,
   matchTabWithGroupConfig,
-} from "@src/util/tabAndTabGroupUtils";
-import { filter, forEach, isEmpty, map } from "lodash";
+} from "@src/pages/background/helpers/tabsHelper";
+import { filter, forEach, isEmpty, map, reverse } from "lodash";
 import { GroupConfig } from "../store/store";
 
 type IDepandencies = { groups: GroupConfig[] };
@@ -95,14 +95,14 @@ const _ungroupMismatchingTabs = async (groupConfigs: GroupConfig[]) => {
 
 const _groupMatchingTabs = async (groupConfigs: GroupConfig[]) => {
   const allTabs = await chrome.tabs.query({});
-  const tabsWithoutGroups = await chrome.tabs.query({
+  const tabsWithoutGroup = await chrome.tabs.query({
     groupId: chrome.tabGroups.TAB_GROUP_ID_NONE,
   });
   console.log("allTabs", allTabs);
-  console.log("tabsWithoutGroups", tabsWithoutGroups);
+  console.log("tabsWithoutGroup", tabsWithoutGroup);
   const tabGroups = await chrome.tabGroups.query({});
 
-  forEach(tabsWithoutGroups, async (tab) => {
+  forEach(tabsWithoutGroup, async (tab) => {
     const groupConfig = getMatchingGroupConfig(tab, groupConfigs);
     if (groupConfig) {
       const tabGroup = getMachineTabGroup(groupConfig, tabGroups);
@@ -124,5 +124,37 @@ const _groupMatchingTabs = async (groupConfigs: GroupConfig[]) => {
 };
 
 const _sortTabGroupsAndRest = async (groupConfigs: GroupConfig[]) => {
-  //
+  const tabGroups = await chrome.tabGroups.query({});
+
+  const _list: chrome.tabGroups.TabGroup[] = [];
+  const _rest: chrome.tabGroups.TabGroup[] = [];
+
+  forEach(groupConfigs, (config) => {
+    const tabGroup = getMachineTabGroup(config, tabGroups);
+    if (tabGroup) {
+      _list.push(tabGroup);
+    } else {
+      _rest.push(tabGroup);
+    }
+  });
+
+  const _final = [..._rest, ...reverse(_list)];
+
+  forEach(_final, (tabGroup) => {
+    chrome.tabGroups.move(tabGroup.id, { index: 0 });
+  });
+
+  const tabsWithoutGroup = await chrome.tabs.query({
+    groupId: chrome.tabGroups.TAB_GROUP_ID_NONE,
+  });
+
+  tabsWithoutGroup.sort(function (a, b) {
+    const aHostname = new URL(a.url).hostname;
+    const bHostname = new URL(b.url).hostname;
+    return aHostname.localeCompare(bHostname);
+  });
+
+  forEach(tabsWithoutGroup, (tab) => {
+    chrome.tabs.move(tab.id, { index: -1 });
+  });
 };

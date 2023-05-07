@@ -17,6 +17,10 @@ initStore();
 const groups: GroupConfig[] = [
   {
     host: "web.whatsapp.com",
+    matcher: (url: string) => {
+      const urlo = new URL(url);
+      return urlo.host === "web.whatsapp.com";
+    },
     tabGroup: { title: "fb", color: "blue" },
   },
   {

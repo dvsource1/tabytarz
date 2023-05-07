@@ -1,6 +1,7 @@
 export interface GroupConfig {
   host: string;
   key?: string;
+  matcher?: (url: string) => boolean;
   tabGroup?: { title: string; color: chrome.tabGroups.ColorEnum | "" };
 }
 
