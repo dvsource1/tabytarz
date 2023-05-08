@@ -44,20 +44,27 @@ export const ROOT_STORE: { groups: GroupConfig[] } = {
       tabGroup: { title: "prod", color: "orange" },
     },
     {
-      matcher: (url: string) => {
+      matcher: (url) => {
         const urlo = new URL(url);
         return urlo.host === "slatescience.atlassian.net";
       },
-      options: { collapse: true },
       tabGroup: { title: "jira", color: "blue" },
     },
     {
-      matcher: (url: string) => {
+      matcher: (url) => {
         const urlo = new URL(url);
         return urlo.host === "github.com";
       },
       options: { collapse: true },
       tabGroup: { title: "git", color: "green" },
+    },
+    {
+      matcher: (url) => {
+        const urlo = new URL(url);
+        return urlo.host === "jwendy.matific.com";
+      },
+      options: { collapse: true },
+      tabGroup: { title: "build", color: "pink" },
     },
     {
       matcher: (url: string) => {
