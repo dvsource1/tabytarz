@@ -4,7 +4,7 @@ import {
 } from "../helpers/tabsHelper";
 import { TabAction, TabActionEvent } from "../listners/tabListner";
 import { GroupConfig } from "../store/store";
-import { _groupTab } from "./commonActions";
+import { _groupTab, _sortAndCollapeTabGroups } from "./commonActions";
 
 type IDepandencies = { groups: GroupConfig[] };
 
@@ -15,7 +15,7 @@ export const handleTabChange =
     const { tab } = e;
     const config = getMatchingGroupConfig(tab, groups);
     if (config) {
-      await hangleTabGrouping(tab, config);
+      await hangleTabGrouping(tab, config, groups);
     }
 
     if (action !== "move") {
@@ -23,13 +23,15 @@ export const handleTabChange =
     }
   };
 
-const hangleTabGrouping = async (tab: chrome.tabs.Tab, config: GroupConfig) => {
+const hangleTabGrouping = async (tab: chrome.tabs.Tab, config: GroupConfig, groups: GroupConfig[]) => {
   const tabGroups = await chrome.tabGroups.query({});
   const tabGroup = getMachineTabGroup(config, tabGroups);
 
   if (tab.groupId !== tabGroup?.id) {
     handleTabOpration(async () => {
-      await _groupTab(tab, tabGroup, config);
+      await _groupTab(tab, tabGroup, config, async () => {
+        await _sortAndCollapeTabGroups(groups);
+      });
     });
   }
 };

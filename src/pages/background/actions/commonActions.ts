@@ -5,7 +5,8 @@ import { forEach, reverse, some } from "lodash";
 export const _groupTab = async (
   tab: chrome.tabs.Tab,
   tabGroup: chrome.tabGroups.TabGroup,
-  config: GroupConfig
+  config: GroupConfig,
+  newTabCreated?: () => void
 ) => {
   const tabGroupId = await chrome.tabs.group({
     groupId: tabGroup?.id,
@@ -19,6 +20,9 @@ export const _groupTab = async (
         : "grey",
       title: config ? config.tabGroup.title : "",
     });
+    if (newTabCreated) {
+      await newTabCreated();
+    }
   }
 };
 
